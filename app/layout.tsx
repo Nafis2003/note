@@ -32,14 +32,14 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="relative flex min-h-screen flex-col">
             <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <div className="container flex h-16 items-center justify-between px-4 sm:px-6">
+              <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
                 <div className="font-semibold text-lg">Note App</div>
                 <ThemeToggle />
               </div>
             </header>
             <main className="flex-1">{children}</main>
             <footer className="border-t py-4 md:py-6">
-              <div className="container flex flex-col items-center justify-between gap-4 px-4 sm:px-6 md:flex-row">
+              <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 sm:px-6 md:flex-row">
                 <p className="text-center text-sm text-muted-foreground md:text-left">
                   &copy; {new Date().getFullYear()} Note App. All rights reserved.
                 </p>
