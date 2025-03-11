@@ -39,7 +39,7 @@ export default function RootLayout({
             </header>
             <main className="flex-1">{children}</main>
             <footer className="border-t py-4 md:py-6">
-              <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
+              <div className="container flex flex-col items-center justify-between gap-4 px-4 sm:px-6 md:flex-row">
                 <p className="text-center text-sm text-muted-foreground md:text-left">
                   &copy; {new Date().getFullYear()} Note App. All rights reserved.
                 </p>
