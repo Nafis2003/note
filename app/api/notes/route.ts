@@ -1,8 +1,8 @@
-import sql from '@/lib/db';
+import { prisma } from "@/lib/db";
 
 export const GET = async () => {
   try {
-    const result = await sql`SELECT * FROM note`;
+    const result = await prisma.note.findMany();
     return Response.json(result);
 } catch (error) {
     console.error(error);
@@ -20,19 +20,15 @@ export const POST = async (request: Request) => {
       return Response.json({ error: "Title or content is required" }, { status: 400 });
     }
     
-    // Insert the new note with PostgreSQL compatible syntax
-    const result = await sql`
-      INSERT INTO note (title, content, "createdAt", "updatedAt") 
-      VALUES (${title || ''}, ${content || ''}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      RETURNING *
-    `;
+    // Create the new note using Prisma
+    const result = await prisma.note.create({
+      data: {
+        title: title || '',
+        content: content || '',
+      }
+    });
     
-    // Check if we got a result
-    if (!result || result.length === 0) {
-      throw new Error("Failed to create note - no result returned");
-    }
-    
-    return Response.json(result[0]);
+    return Response.json(result);
   } catch (error) {
     console.error("Error creating note:", error);
     return Response.json({ 
@@ -56,22 +52,25 @@ export const PUT = async (request: Request) => {
       return Response.json({ error: "Title or content is required" }, { status: 400 });
     }
     
-    // Update the note with PostgreSQL compatible syntax
-    const result = await sql`
-      UPDATE note 
-      SET 
-        title = ${title}, 
-        content = ${content}, 
-        "updatedAt" = CURRENT_TIMESTAMP
-      WHERE id = ${id}
-      RETURNING *
-    `;
+    // Find the note first to check if it exists
+    const existingNote = await prisma.note.findUnique({
+      where: { id: Number(id) }
+    });
     
-    if (!result || result.length === 0) {
+    if (!existingNote) {
       return Response.json({ error: "Note not found" }, { status: 404 });
     }
     
-    return Response.json(result[0]);
+    // Update the note using Prisma
+    const result = await prisma.note.update({
+      where: { id: Number(id) },
+      data: {
+        title: title || existingNote.title,
+        content: content || existingNote.content,
+      }
+    });
+    
+    return Response.json(result);
   } catch (error) {
     console.error("Error updating note:", error);
     return Response.json({ 
@@ -92,18 +91,21 @@ export const DELETE = async (request: Request) => {
       return Response.json({ error: "Note ID is required" }, { status: 400 });
     }
     
-    // Delete the note with PostgreSQL compatible syntax
-    const result = await sql`
-      DELETE FROM note 
-      WHERE id = ${parseInt(id, 10)}
-      RETURNING id
-    `;
+    // Find the note first to check if it exists
+    const existingNote = await prisma.note.findUnique({
+      where: { id: Number(id) }
+    });
     
-    if (!result || result.length === 0) {
+    if (!existingNote) {
       return Response.json({ error: "Note not found" }, { status: 404 });
     }
     
-    return Response.json({ id: result[0].id });
+    // Delete the note using Prisma
+    await prisma.note.delete({
+      where: { id: Number(id) }
+    });
+    
+    return Response.json({ id: Number(id) });
   } catch (error) {
     console.error("Error deleting note:", error);
     return Response.json({ 
